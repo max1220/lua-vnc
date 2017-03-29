@@ -56,11 +56,11 @@ static int vnc_server_process_events(lua_State *L) {
 static int vnc_server_set_pixel(lua_State *L) {
     server_t *server = (server_t *)lua_touserdata(L, 1);
     rfbScreenInfoPtr screen = server->screen;
-    int x = lua_tointeger(L, 1);
-    int y = lua_tointeger(L, 2);
-    int r = lua_tointeger(L, 3);
-    int g = lua_tointeger(L, 4);
-    int b = lua_tointeger(L, 5);
+    int x = lua_tointeger(L, 2);
+    int y = lua_tointeger(L, 3);
+    int r = lua_tointeger(L, 4);
+    int g = lua_tointeger(L, 5);
+    int b = lua_tointeger(L, 6);
     
 	screen->frameBuffer[(y*server->w+x)*BYTES_PER_PIXEL+0] = r;
     screen->frameBuffer[(y*server->w+x)*BYTES_PER_PIXEL+1] = g;
@@ -121,10 +121,10 @@ static int vnc_server_update_rect(lua_State *L) {
     server_t *server = (server_t *)lua_touserdata(L, 1);
     rfbScreenInfoPtr screen = server->screen;
     
-    int x = lua_tointeger(L, 1);
-    int y = lua_tointeger(L, 2);
-    int w = lua_tointeger(L, 3);
-    int h = lua_tointeger(L, 4);
+    int x = lua_tointeger(L, 2);
+    int y = lua_tointeger(L, 3);
+    int w = lua_tointeger(L, 4);
+    int h = lua_tointeger(L, 5);
     
     rfbMarkRectAsModified(screen,x,y,w,h);
     
