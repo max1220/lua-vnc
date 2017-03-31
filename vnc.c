@@ -78,6 +78,8 @@ static int vnc_server_draw_from_drawbuffer(lua_State *L) {
     rfbScreenInfoPtr screen = server->screen;
     drawbuffer_t *db = (drawbuffer_t *)lua_touserdata(L, 2);
     
+    // printf("screen w: %d,   screen h: %d,   db w: %d,   db h: %d \n", screen->width, screen->height, db->w, db->h);
+    
     int target_x = lua_tointeger(L, 3);
     int target_y = lua_tointeger(L, 4);
     
@@ -90,30 +92,43 @@ static int vnc_server_draw_from_drawbuffer(lua_State *L) {
     int cx;
     int cy;
     
+    int tx;
+    int ty;
+    
+    int ox;
+    int oy;
+    
     pixel_t p;
+
+	//printf("%d %d   %d %d   %d %d\n", target_x, target_y,  origin_x, origin_y,  w, h);
 
     for (cy=0; cy < h; cy=cy+1) {
         for (cx=0; cx < w; cx=cx+1) {
-            if (origin_x+cx < 0 || origin_x+cx >= db->w || \
-            	origin_y+cy < 0 || origin_y+cy >= db->h || \
-            	target_x+cx < 0 || target_x + cx >= server->w ||
-            	target_y+cy < 0 || target_x + cx >= server->w) {
+			tx = target_x+cx;
+			ty = target_y+cy;
+			ox = origin_x+cx;
+			oy = origin_x+cy;
+			
+            if (ox < 0 || ox >= db->w-1 || \
+            	oy < 0 || oy >= db->h-1 || \
+            	tx < 0 || tx >= server->w-1 ||
+            	ty < 0 || ty >= server->h-1) {
+					
+				// printf("\nOut of bounds!\n\n");
+					
             	continue;
-            }
-            p = db->data[(cy+origin_y)*(db->w)+cx+origin_x];
+            } else {
+				p = db->data[oy*db->w+ox];
             
-            screen->frameBuffer[((target_y+cy)*server->w+target_x+cx)*BYTES_PER_PIXEL+0] = p.r;
-    		screen->frameBuffer[((target_y+cy)*server->w+target_x+cx)*BYTES_PER_PIXEL+1] = p.g;
-    		screen->frameBuffer[((target_y+cy)*server->w+target_x+cx)*BYTES_PER_PIXEL+2] = p.b;
+				// printf("\nx: %d, y: %d, r,g,b: %d,%d,%d\n\n", cx,cy,p.r,p.g,p.b);
             
+				screen->frameBuffer[(ty*server->w+tx)*BYTES_PER_PIXEL+0] = p.r;
+				screen->frameBuffer[(ty*server->w+tx)*BYTES_PER_PIXEL+1] = p.g;
+				screen->frameBuffer[(ty*server->w+tx)*BYTES_PER_PIXEL+2] = p.b;
+			}            
         }
     }
 
-    return 0;
-    
-    
-    
-    
     return 0;
 }
 
@@ -133,16 +148,15 @@ static int vnc_server_update_rect(lua_State *L) {
 
 static int l_new_server(lua_State *L) {
     server_t *server = (server_t *)lua_newuserdata(L, sizeof(*server));
-	rfbScreenInfoPtr screen = rfbGetScreen(NULL, NULL, server->w, server->h, BITS_PER_SAMPLE,SAMPLES_PER_PIXEL, BYTES_PER_PIXEL);
-	server->screen = screen;
-
     server->w = lua_tointeger(L, 1);
     server->h = lua_tointeger(L, 2);
 
+	rfbScreenInfoPtr screen = rfbGetScreen(NULL, NULL, server->w, server->h, BITS_PER_SAMPLE,SAMPLES_PER_PIXEL, BYTES_PER_PIXEL);
+	server->screen = screen;
+	
 	screen->frameBuffer = calloc(server->w * server->h, BYTES_PER_PIXEL);    
     
     rfbInitServer(screen);
-    
     
     lua_createtable(L, 0, 7);
     lua_pushvalue(L, -1);
