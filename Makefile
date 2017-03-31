@@ -10,4 +10,4 @@ vnc.so: vnc.c
 
 
 clean:
-	rm vnc.so
+	rm -f vnc.so
