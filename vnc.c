@@ -107,7 +107,7 @@ static int vnc_server_draw_from_drawbuffer(lua_State *L) {
 			tx = target_x+cx;
 			ty = target_y+cy;
 			ox = origin_x+cx;
-			oy = origin_x+cy;
+			oy = origin_y+cy;
 			
             if (ox < 0 || ox >= db->w-1 || \
             	oy < 0 || oy >= db->h-1 || \
@@ -146,6 +146,32 @@ static int vnc_server_update_rect(lua_State *L) {
     return 0;
 }
 
+static int vnc_server_set_on_key(lua_State *L) {
+    server_t *server = (server_t *)lua_touserdata(L, 1);
+    rfbScreenInfoPtr screen = server->screen;
+    
+    // TODO
+    
+    return 0;
+}
+
+static int vnc_server_set_on_mouse(lua_State *L) {
+    server_t *server = (server_t *)lua_touserdata(L, 1);
+    rfbScreenInfoPtr screen = server->screen;
+    
+    // TODO
+    
+    return 0;
+}
+
+static int vnc_server_tostring(lua_State *L) {
+    server_t *server = (server_t *)lua_touserdata(L, 1);
+    
+    lua_pushfstring(L, "vncserver: %dx%d", server->w, server->h);
+    
+    return 0;
+}
+
 static int l_new_server(lua_State *L) {
     server_t *server = (server_t *)lua_newuserdata(L, sizeof(*server));
     server->w = lua_tointeger(L, 1);
@@ -154,11 +180,13 @@ static int l_new_server(lua_State *L) {
 	rfbScreenInfoPtr screen = rfbGetScreen(NULL, NULL, server->w, server->h, BITS_PER_SAMPLE,SAMPLES_PER_PIXEL, BYTES_PER_PIXEL);
 	server->screen = screen;
 	
+	screen->autoPort = TRUE;
+	
 	screen->frameBuffer = calloc(server->w * server->h, BYTES_PER_PIXEL);    
     
     rfbInitServer(screen);
     
-    lua_createtable(L, 0, 7);
+    lua_createtable(L, 0, 10);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
 
@@ -169,6 +197,9 @@ static int l_new_server(lua_State *L) {
     LUA_T_PUSH_S_CF("set_pixel", vnc_server_set_pixel)
     LUA_T_PUSH_S_CF("draw_from_drawbuffer", vnc_server_draw_from_drawbuffer)
     LUA_T_PUSH_S_CF("update_rect", vnc_server_update_rect)
+    LUA_T_PUSH_S_CF("vnc_server_set_on_key", vnc_server_set_on_key)
+    LUA_T_PUSH_S_CF("vnc_server_set_on_mouse", vnc_server_set_on_mouse)
+    LUA_T_PUSH_S_CF("__tostring", vnc_server_tostring)
     lua_setmetatable(L, -2);
     
     return 1;
