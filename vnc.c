@@ -17,8 +17,10 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-#include "lfb.h"
+#include "lua-db.h"
+
 #include "libvncserver/rfb/rfb.h"
+#include "libvncserver/rfb/rfbclient.h"
 
 #define VERSION "0.1"
 
@@ -288,6 +290,18 @@ static int l_new_server(lua_State *L) {
     return 1;
 }
 
+
+/*
+static int l_new_client(lua_State *L) {
+	client_t *client = (client_t *)lua_newuserdata(L, sizeof(*client));
+	rfbClient* client = rfbGetClient(8,3,24)
+	client->serverHost = luaL_checkstring(L, 1);
+	client->serverPort = luaL_checkstring(L, 2);
+	client->programName = luaL_checkstring(L, 3);
+	if (!rfbInitClient(client,NULL, NULL))
+		return 0;
+}
+*/
 
 LUALIB_API int luaopen_vnc(lua_State *L) {
     lua_newtable(L);

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Adjust to your needs. lua5.1 is ABI-Compatible with luajit.
-CFLAGS= -O3 -Wall -Wextra -fPIC -I/usr/include/lua5.1 -I../lfb -Ilibvncserver -Ilibvncserver/libvncserver
+CFLAGS= -O3 -Wall -Wextra -fPIC -I/usr/include/lua5.1 -Ilibvncserver -Ilibvncserver/libvncserver
 LIBS= -shared -llua5.1 -lvncserver
 
 .PHONY: clean all
@@ -22,6 +22,3 @@ keysymdef.lua: keysymdef.h
 
 clean:
 	rm -f vnc.so
-
-
-# 
